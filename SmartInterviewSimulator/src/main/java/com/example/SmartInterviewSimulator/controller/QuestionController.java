@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/question")
-@CrossOrigin(origins = "http://localhost:4200") // ✅ safer than "*"
+@CrossOrigin(origins = "*")
 public class QuestionController {
 
     @Autowired

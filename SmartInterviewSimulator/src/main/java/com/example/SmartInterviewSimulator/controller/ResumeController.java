@@ -14,7 +14,7 @@ import com.example.SmartInterviewSimulator.service.ResumeService;
 
 @RestController
 @RequestMapping("/resume")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class ResumeController {
 
     @Autowired

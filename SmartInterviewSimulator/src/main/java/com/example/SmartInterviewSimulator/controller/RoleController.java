@@ -9,7 +9,7 @@ import com.example.SmartInterviewSimulator.service.RoleService;
 
 @RestController
 @RequestMapping("/roles")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 public class RoleController {
 
     @Autowired
