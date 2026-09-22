@@ -1,0 +1,142 @@
+<!-- interview.component.html -->
+<div class="interview-page">
+
+  <!-- Minimalist Top Navbar -->
+  <header class="navbar">
+    <div class="nav-actions">
+      <!-- Minimalist Voice Persona Selector -->
+      <div class="voice-picker">
+        <label for="voiceSelect" class="voice-label">🎙 Voice:</label>
+        <select
+          id="voiceSelect"
+          class="voice-select"
+          [ngModel]="selectedVoicePersona"
+          (ngModelChange)="onVoiceChange($event)">
+          <option value="natural-female">Natural Female (Ava / Samantha)</option>
+          <option value="natural-male">Natural Male (Daniel / Alex)</option>
+          <option value="system">System Default</option>
+        </select>
+        <button class="test-voice-btn" (click)="testVoice()" title="Preview selected voice">
+          🔊 Test
+        </button>
+      </div>
+
+      <button class="back-btn" (click)="goBack()">
+        ⬅ Back
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Interview Stage (No Blur Boxes - Pure Typography & Perfect Alignment) -->
+  <main class="interview-stage">
+
+    <!-- Session Badges & Status -->
+    <div class="stage-header">
+      <h1 class="stage-title">AI Interview</h1>
+
+      <div class="badges-row">
+        <span class="badge">{{ role }}</span>
+        <span class="badge level">{{ difficulty }}</span>
+        <span class="badge count-badge" *ngIf="questions.length > 0">
+          Question {{ currentQuestionIndex + 1 }} / {{ questions.length }}
+        </span>
+      </div>
+
+      <div class="status-pill" *ngIf="saveStatus">
+        {{ saveStatus }}
+      </div>
+    </div>
+
+    <!-- Question Area (Pure Text) -->
+    <section class="question-container">
+      <div class="section-indicator">
+        <span class="section-label">INTERVIEW QUESTION</span>
+
+        <!-- AI Speaking Indicator -->
+        <div class="speaking-indicator" *ngIf="isAiSpeaking">
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-bar"></span>
+          <span class="wave-text">Interviewer Speaking...</span>
+        </div>
+      </div>
+
+      <p class="question-text">
+        {{ displayedText || 'Preparing your interview question...' }}
+      </p>
+    </section>
+
+    <div class="stage-divider"></div>
+
+    <!-- Answer Area (Pure Text) -->
+    <section class="answer-container">
+      <div class="section-indicator">
+        <span class="section-label">YOUR ANSWER</span>
+
+        <!-- Listening Mic Status -->
+        <div class="mic-status" *ngIf="isListening && !isProcessingFeedback">
+          <span class="mic-pulse"></span>
+          <span class="mic-text">Listening... Speak clearly</span>
+        </div>
+
+        <!-- Feedback Processing Spinner -->
+        <div class="processing-badge" *ngIf="isProcessingFeedback">
+          <span class="spinner"></span>
+          <span>Evaluating response & saving...</span>
+        </div>
+      </div>
+
+      <p class="answer-text" [class.recording-text]="isListening">
+        {{ userAnswer || (isListening ? 'Listening to your microphone...' : 'Waiting for interviewer...') }}
+      </p>
+    </section>
+
+    <!-- Controls -->
+    <div class="stage-controls">
+      <button
+        class="control-btn stop-btn"
+        *ngIf="!isPaused"
+        (click)="stopInterview()">
+        Pause Interview
+      </button>
+
+      <button
+        class="control-btn resume-btn"
+        *ngIf="isPaused"
+        (click)="resumeInterview()">
+        Resume Interview
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Start Session Modal (Minimalist & Transparent) -->
+  <div class="modal-overlay" *ngIf="showStartModal">
+    <div class="modal-card">
+      <h2 class="modal-title">Ready to Begin?</h2>
+      <p class="modal-desc">
+        Your AI interview for <strong>{{ role }}</strong> ({{ difficulty }}) is initialized.
+      </p>
+
+      <div class="modal-voice-row">
+        <label>Interviewer Voice:</label>
+        <select
+          class="voice-select-modal"
+          [ngModel]="selectedVoicePersona"
+          (ngModelChange)="onVoiceChange($event)">
+          <option value="natural-female">Natural Female (Ava / Samantha)</option>
+          <option value="natural-male">Natural Male (Daniel / Alex)</option>
+          <option value="system">System Default</option>
+        </select>
+        <button type="button" class="test-voice-modal-btn" (click)="testVoice()">
+          🔊 Test
+        </button>
+      </div>
+
+      <button class="start-session-btn" (click)="startInterviewFromPopup()">
+        Start Interview
+      </button>
+    </div>
+  </div>
+
+</div>

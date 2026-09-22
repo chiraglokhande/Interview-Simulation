@@ -1,0 +1,64 @@
+<!-- history-details.component.html -->
+<div class="details-page">
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <button class="back-btn" (click)="goBack()">
+      ⬅ Back
+    </button>
+  </header>
+
+  <!-- Content Section -->
+  <section class="details-section">
+
+    <div class="header-section">
+      <h1 class="title">
+        {{ role | titlecase }} History
+      </h1>
+      <p class="subtitle">
+        Review your recorded responses, question prompts, and AI evaluations.
+      </p>
+    </div>
+
+    <!-- Status Messages -->
+    <div *ngIf="loading" class="status-msg">
+      Loading interview records...
+    </div>
+
+    <div *ngIf="!loading && data.length === 0" class="status-msg">
+      No Evaluation History Found
+    </div>
+
+    <!-- Questions List (No Blur Box - Transparent & Aligned) -->
+    <div class="records-list" *ngIf="!loading && data.length > 0">
+      <article
+        class="record-item"
+        *ngFor="let item of data; let i=index"
+      >
+        <div class="record-header">
+          <span class="q-badge">Question {{ i + 1 }}</span>
+          <span class="score-badge" *ngIf="item.score !== undefined && item.score !== null && item.score > 0">
+            ★ Score: {{ item.score }} / 10
+          </span>
+        </div>
+
+        <div class="record-block">
+          <h3 class="block-title">QUESTION</h3>
+          <p class="block-text">{{ item.question }}</p>
+        </div>
+
+        <div class="record-block">
+          <h3 class="block-title">YOUR ANSWER</h3>
+          <p class="block-text">{{ item.answer }}</p>
+        </div>
+
+        <div class="record-block">
+          <h3 class="block-title">AI FEEDBACK</h3>
+          <p class="block-text feedback-text">{{ item.feedback }}</p>
+        </div>
+      </article>
+    </div>
+
+  </section>
+
+</div>

@@ -1,0 +1,34 @@
+<!-- register.component.html -->
+<div class="auth-page">
+
+  <div class="auth-form-wrapper">
+
+    <h1 class="auth-title">Create Account</h1>
+    <p class="auth-subtitle">Begin your AI interview journey today</p>
+
+    <div class="input-field">
+      <input [(ngModel)]="name" type="text" required placeholder=" " id="nameInput" />
+      <label for="nameInput">Full Name</label>
+    </div>
+
+    <div class="input-field">
+      <input [(ngModel)]="email" type="email" required placeholder=" " id="regEmailInput" />
+      <label for="regEmailInput">Email Address</label>
+    </div>
+
+    <div class="input-field">
+      <input [(ngModel)]="password" type="password" required placeholder=" " id="regPasswordInput" />
+      <label for="regPasswordInput">Password</label>
+    </div>
+
+    <button (click)="register()" class="auth-btn">
+      Create Account
+    </button>
+
+    <a routerLink="/login" class="auth-link">
+      Already have an account? Login
+    </a>
+
+  </div>
+
+</div>

@@ -1,0 +1,40 @@
+<!-- dashboard.component.html -->
+<div class="dashboard-page">
+
+  <!-- Minimalist Top Bar -->
+  <header class="navbar">
+    <button class="logout-btn" (click)="logout()">
+      Logout
+    </button>
+  </header>
+
+  <!-- Hero Content (No Bounding Blur Box - Pure Typography) -->
+  <section class="hero-section">
+    <div class="hero-inner">
+
+      <div class="elite-tag">
+        ✦ PERSONALIZED MOCK INTERVIEW
+      </div>
+
+      <h1 class="hero-title">
+        Begin Your <span class="highlight">Career Journey</span>
+      </h1>
+
+      <p class="hero-desc">
+        Practice voice interviews with real-time AI evaluation. Build communication clarity, track your performance scores, and master every question.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn btn-primary" (click)="goToRoles()">
+          Start Interview
+        </button>
+
+        <button class="btn btn-outline" (click)="goToHistory()">
+          My Progress
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+</div>

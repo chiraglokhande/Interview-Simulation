@@ -1,0 +1,43 @@
+<!-- Dual Dynamic Video Backgrounds (Day & Night) -->
+<div class="video-background-container">
+  <!-- Day Mode Video -->
+  <video
+    autoplay
+    muted
+    loop
+    playsinline
+    class="video-background day-video"
+    [class.active]="!isDarkMode"
+    preload="auto">
+    <source src="/background.mp4" type="video/mp4">
+  </video>
+
+  <!-- Night Mode Video (Dark Mode) -->
+  <video
+    autoplay
+    muted
+    loop
+    playsinline
+    class="video-background night-video"
+    [class.active]="isDarkMode"
+    preload="auto">
+    <source src="/background-night.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- Floating Minimalist Theme Toggle (Day / Night) -->
+<div class="global-theme-wrapper">
+  <button
+    class="theme-toggle-btn"
+    (click)="toggleTheme()"
+    [title]="isDarkMode ? 'Switch to Day Mode (Light)' : 'Switch to Night Mode (Dark)'"
+    aria-label="Toggle Day or Night theme">
+    <span class="theme-icon">{{ isDarkMode ? '🌙' : '☀️' }}</span>
+    <span class="theme-label">{{ isDarkMode ? 'Dark' : 'Day' }}</span>
+  </button>
+</div>
+
+<!-- Routed Views -->
+<main class="app-root-content">
+  <router-outlet></router-outlet>
+</main>

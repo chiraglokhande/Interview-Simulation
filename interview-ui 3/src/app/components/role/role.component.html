@@ -1,0 +1,64 @@
+<!-- role.component.html -->
+<div class="role-page">
+
+  <!-- Top Navbar -->
+  <header class="navbar">
+    <button class="back-btn" (click)="goBack()">
+      ⬅ Back
+    </button>
+  </header>
+
+  <!-- Role Selection Section -->
+  <section class="role-section">
+
+    <div class="header-section">
+      <h1 class="title">Choose Your Interview Role</h1>
+      <p class="subtitle">
+        Select your technology domain and challenge difficulty to start.
+      </p>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-wrapper">
+      <input
+        type="text"
+        [(ngModel)]="search"
+        (keyup.enter)="handleEnter()"
+        placeholder="Search interview roles..."
+        class="search-box"
+      />
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-box">
+      Loading roles...
+    </div>
+
+    <!-- Clean Grid of Roles (No Blur Boxes - See-Through & Aligned) -->
+    <div class="role-grid" *ngIf="!loading">
+      <div
+        class="role-tile"
+        *ngFor="let role of filteredRoles; trackBy: trackById"
+      >
+        <div class="tile-header">
+          <h3 class="role-name">{{ role.name }}</h3>
+          <p class="role-tag">Professional AI Practice</p>
+        </div>
+
+        <div class="difficulty-group">
+          <button class="diff-btn easy" (click)="startInterview(role, 'easy')">
+            Easy
+          </button>
+          <button class="diff-btn medium" (click)="startInterview(role, 'medium')">
+            Medium
+          </button>
+          <button class="diff-btn hard" (click)="startInterview(role, 'hard')">
+            Hard
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</div>

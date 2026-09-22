@@ -1,0 +1,139 @@
+/* Global Reset and Box-less Ultra-Clean Theme */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  color: #ffffff;
+  font-family: 'Quicksand', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Global Video Background - 100% Full Video Display Without Cropping */
+.video-background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -999;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent !important;
+}
+
+.video-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill !important; /* Full frame from edge to edge without any cropping */
+  filter: none !important;
+  border: none;
+  outline: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.85s;
+  pointer-events: none;
+}
+
+.video-background.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 1;
+}
+
+/* Floating Minimalist Theme Toggle Button (Day / Night) */
+.global-theme-wrapper {
+  position: fixed;
+  top: 24px;
+  left: 28px;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 40px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(0, 0, 0, 0.65);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.theme-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.theme-label {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.app-root-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  width: 100%;
+  background: transparent !important;
+}
+
+/* Global Elite Typography Shadows (Crystal Clear Against Day & Night Scenery) */
+h1, h2, h3, h4, h5, h6 {
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.7);
+  letter-spacing: 0.5px;
+}
+
+p, span, label, button, a, select, input, textarea {
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Universal Minimal Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+  .global-theme-wrapper {
+    top: 14px;
+    left: 14px;
+  }
+  .theme-toggle-btn {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+}

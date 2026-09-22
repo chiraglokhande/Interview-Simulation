@@ -1,0 +1,29 @@
+<!-- login.component.html -->
+<div class="auth-page">
+
+  <div class="auth-form-wrapper">
+
+    <h1 class="auth-title">Welcome Back</h1>
+    <p class="auth-subtitle">Login to continue your interview preparation</p>
+
+    <div class="input-field">
+      <input type="email" [(ngModel)]="email" required placeholder=" " id="emailInput" />
+      <label for="emailInput">Email Address</label>
+    </div>
+
+    <div class="input-field">
+      <input type="password" [(ngModel)]="password" required placeholder=" " id="passwordInput" />
+      <label for="passwordInput">Password</label>
+    </div>
+
+    <button class="auth-btn" (click)="login()">
+      Login
+    </button>
+
+    <a class="auth-link" routerLink="/register">
+      New Explorer? Create Account
+    </a>
+
+  </div>
+
+</div>

@@ -1,0 +1,46 @@
+<!-- history.component.html -->
+<div class="history-page">
+
+  <!-- Minimalist Top Bar -->
+  <header class="navbar">
+    <button class="back-btn" (click)="goBack()">
+      ⬅ Back
+    </button>
+  </header>
+
+  <!-- Header -->
+  <section class="history-section">
+
+    <div class="header-section">
+      <h1 class="title">Interview History</h1>
+      <p class="subtitle">
+        Review your recorded interview sessions and detailed question evaluations.
+      </p>
+    </div>
+
+    <!-- Status Messages -->
+    <div *ngIf="loading" class="status-msg">
+      Loading your history...
+    </div>
+
+    <div *ngIf="!loading && roles.length === 0" class="status-msg">
+      No Interview History Found Yet
+    </div>
+
+    <!-- Grid of Roles (No Blur Box - Transparent & Aligned) -->
+    <div class="history-grid" *ngIf="!loading && roles.length > 0">
+      <div class="history-tile" *ngFor="let item of roles">
+        <h2 class="role-title">{{ item | titlecase }}</h2>
+        <p class="role-desc">
+          Completed session evaluations, scores, and questions.
+        </p>
+
+        <button class="view-btn" (click)="openDetails(item)">
+          View Details
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+</div>
