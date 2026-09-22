@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InterviewService {
 
-  private baseUrl = 'http://localhost:8080';
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
@@ -60,7 +61,7 @@ startInterview(role: string, difficulty: string): Observable<any> {
 getFollowUp(question: string, answer: string): Observable<string> {
 
   return this.http.post(
-    'http://localhost:8080/question/followup',
+    `${this.baseUrl}/question/followup`,
     {
       question: question,
       answer: answer
