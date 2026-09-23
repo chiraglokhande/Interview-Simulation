@@ -27,21 +27,95 @@ public class AIServiceImpl implements AIService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${groq.model:llama-3.3-70b-versatile}")
+    private String groqModel;
+
     // ✅ MAIN METHOD (UPDATED WITH DIFFICULTY)
     @Override
     public List<String> generateQuestions(String role, String difficulty) {
 
         String prompt = buildPrompt(role, difficulty);
 
-        String response = callAI(prompt);
+        List<String> questions = new ArrayList<>();
+        try {
+            String response = callAI(prompt);
+            if (response != null && !response.trim().isEmpty()) {
+                questions = Arrays.stream(response.split("\n"))
+                        .map(String::trim)
+                        .filter(q -> !q.isEmpty())
+                        .filter(q -> q.endsWith("?"))
+                        .map(q -> q.replaceAll("^\\d+[\\.\\)]\\s*", ""))
+                        .limit(5)
+                        .toList();
+            }
+        } catch (Exception e) {
+            System.err.println("Error generating questions from AI: " + e.getMessage());
+        }
 
-        return Arrays.stream(response.split("\n"))
-                .map(String::trim)
-                .filter(q -> !q.isEmpty())
-                .filter(q -> q.endsWith("?"))
-                .map(q -> q.replaceAll("^\\d+\\.\\s*", ""))
-                .limit(5)
-                .toList();
+        if (questions.isEmpty()) {
+            questions = getDefaultQuestions(role, difficulty);
+        }
+
+        return questions;
+    }
+
+    // 🛡️ Reliable fallback questions when AI APIs are unreachable or exhausted
+    private List<String> getDefaultQuestions(String role, String difficulty) {
+        String lowerRole = role != null ? role.toLowerCase() : "";
+        String lowerDiff = difficulty != null ? difficulty.toLowerCase() : "easy";
+
+        if (lowerRole.contains("java") || lowerRole.contains("spring")) {
+            if ("hard".equals(lowerDiff)) {
+                return List.of(
+                    "How does the JVM Garbage Collector manage memory across Eden, Survivor, and Tenured spaces?",
+                    "What are the concurrency guarantees provided by volatile and the Java Memory Model?",
+                    "How do you tune HikariCP connection pool parameters for high-throughput Spring Boot applications?",
+                    "Explain the difference between optimistic and pessimistic locking in Hibernate/JPA?",
+                    "How would you design a distributed transaction workflow across microservices using the Saga pattern?"
+                );
+            } else if ("medium".equals(lowerDiff)) {
+                return List.of(
+                    "What is the difference between HashMap and ConcurrentHashMap in terms of thread-safety?",
+                    "How does Spring Boot's @Transactional annotation work internally using AOP proxies?",
+                    "What is the difference between Comparable and Comparator in Java Collections?",
+                    "Explain the differences between checked and unchecked exceptions in Java?",
+                    "How do CompletableFuture and ExecutorService differ for asynchronous task execution?"
+                );
+            } else {
+                return List.of(
+                    "What are the key differences between an abstract class and an interface in Java?",
+                    "What is the purpose of the 'final' keyword when applied to variables, methods, and classes?",
+                    "Explain the difference between '==' and '.equals()' in Java?",
+                    "What are the main advantages of using Spring Boot over standard Spring MVC?",
+                    "How does Dependency Injection improve code maintainability and testability?"
+                );
+            }
+        } else if (lowerRole.contains("frontend") || lowerRole.contains("angular") || lowerRole.contains("react")) {
+            return List.of(
+                "What is the difference between Observables and Promises for asynchronous operations?",
+                "How does the Virtual DOM or Angular Change Detection work under the hood?",
+                "What are the best practices for managing application state across unrelated components?",
+                "Explain the critical rendering path and techniques to optimize First Contentful Paint (FCP)?",
+                "How do you implement secure client-side authentication token storage and interceptors?"
+            );
+        } else if (lowerRole.contains("python")) {
+            return List.of(
+                "What is Python's Global Interpreter Lock (GIL) and how does it affect CPU-bound multithreading?",
+                "What is the difference between shallow copy and deep copy in Python?",
+                "How do generators and the 'yield' keyword help with memory efficiency?",
+                "Explain how Python's garbage collection and reference counting mechanism work?",
+                "What are Python decorators and how do you write a custom parameterized decorator?"
+            );
+        }
+
+        // Generic fallback for any other role
+        return List.of(
+            "What are the core technical responsibilities you have handled as a " + role + "?",
+            "Can you explain a complex architectural problem you solved recently in " + role + "?",
+            "How do you approach debugging and root cause analysis in production environments?",
+            "What testing strategies (unit, integration, end-to-end) do you follow in your development workflow?",
+            "How do you design scalable and maintainable systems for " + role + " projects?"
+        );
     }
 
     // 🔥 Prompt Builder (VERY IMPORTANT)
@@ -119,12 +193,16 @@ public class AIServiceImpl implements AIService {
 
     // 🔥 GROQ CALL
     private String callGroq(String prompt) {
+        if (apiKey == null || apiKey.trim().isEmpty() || "YOUR_GROQ_API_KEY".equals(apiKey.trim())) {
+            return null;
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
         Map<String, Object> body = new HashMap<>();
-        body.put("model", "openai/gpt-oss-20b");
+        body.put("model", groqModel != null && !groqModel.isEmpty() ? groqModel : "llama-3.3-70b-versatile");
 
         Map<String, String> message = new HashMap<>();
         message.put("role", "user");
@@ -153,7 +231,7 @@ public class AIServiceImpl implements AIService {
 
     // 🔥 GEMINI CALL
     private String callGemini(String prompt) {
-        if (geminiApiKey == null || geminiApiKey.isEmpty() || geminiUrl == null || geminiUrl.isEmpty()) {
+        if (geminiApiKey == null || geminiApiKey.trim().isEmpty() || "YOUR_GEMINI_API_KEY".equals(geminiApiKey.trim()) || geminiUrl == null || geminiUrl.isEmpty()) {
             return null;
         }
 

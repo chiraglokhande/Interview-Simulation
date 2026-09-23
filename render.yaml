@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: interview-simulation-backend
+    runtime: docker
+    rootDir: ./SmartInterviewSimulator
+    dockerfilePath: ./SmartInterviewSimulator/Dockerfile
+    dockerContext: ./SmartInterviewSimulator
+    plan: free
+    healthCheckPath: /roles
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
