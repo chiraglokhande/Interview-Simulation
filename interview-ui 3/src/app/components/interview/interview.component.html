@@ -3,54 +3,60 @@
 
   <!-- Minimalist Top Navbar -->
   <header class="navbar">
-    <div class="nav-actions">
+    <div class="nav-container">
+      <button class="back-btn" (click)="goBack()" title="Exit interview and return">
+        ⬅ Exit
+      </button>
+
+      <!-- Center Progress Pill -->
+      <div class="progress-pill" *ngIf="questions.length > 0 && !isInterviewComplete">
+        <div class="progress-text">Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+        </div>
+      </div>
+
       <!-- Minimalist Voice Persona Selector -->
       <div class="voice-picker">
-        <label for="voiceSelect" class="voice-label">🎙 Voice:</label>
+        <label for="voiceSelect" class="voice-label">🎙</label>
         <select
           id="voiceSelect"
           class="voice-select"
           [ngModel]="selectedVoicePersona"
-          (ngModelChange)="onVoiceChange($event)">
-          <option value="natural-female">Natural Female (Ava / Samantha)</option>
-          <option value="natural-male">Natural Male (Daniel / Alex)</option>
+          (ngModelChange)="onVoiceChange($event)"
+          title="Select interviewer voice persona">
+          <option value="natural-female">Natural Female</option>
+          <option value="natural-male">Natural Male</option>
           <option value="system">System Default</option>
         </select>
         <button class="test-voice-btn" (click)="testVoice()" title="Preview selected voice">
           🔊 Test
         </button>
       </div>
-
-      <button class="back-btn" (click)="goBack()">
-        ⬅ Back
-      </button>
     </div>
   </header>
 
-  <!-- Main Interview Stage (No Blur Boxes - Pure Typography & Perfect Alignment) -->
-  <main class="interview-stage">
+  <!-- Main Interview Stage (Centered & Aligned on All Devices) -->
+  <main class="interview-stage" *ngIf="!isInterviewComplete">
 
     <!-- Session Badges & Status -->
     <div class="stage-header">
-      <h1 class="stage-title">AI Interview</h1>
-
       <div class="badges-row">
-        <span class="badge">{{ role }}</span>
-        <span class="badge level">{{ difficulty }}</span>
-        <span class="badge count-badge" *ngIf="questions.length > 0">
-          Question {{ currentQuestionIndex + 1 }} / {{ questions.length }}
-        </span>
+        <span class="badge role-badge">{{ role }}</span>
+        <span class="badge level-badge">{{ difficulty }}</span>
+        <span class="badge follow-up-badge" *ngIf="isFollowUp">✦ Follow-Up</span>
       </div>
 
-      <div class="status-pill" *ngIf="saveStatus">
+      <!-- Status Notification (Saved score, evaluating, etc.) -->
+      <div class="status-pill" *ngIf="saveStatus" role="status" aria-live="polite">
         {{ saveStatus }}
       </div>
     </div>
 
-    <!-- Question Area (Pure Text) -->
-    <section class="question-container">
+    <!-- Question Area (Centered Typography) -->
+    <section class="question-container" aria-label="Current interview question">
       <div class="section-indicator">
-        <span class="section-label">INTERVIEW QUESTION</span>
+        <span class="section-label">{{ isFollowUp ? 'FOLLOW-UP PROMPT' : 'INTERVIEW QUESTION' }}</span>
 
         <!-- AI Speaking Indicator -->
         <div class="speaking-indicator" *ngIf="isAiSpeaking">
@@ -66,71 +72,125 @@
       </p>
     </section>
 
-    <div class="stage-divider"></div>
+    <div class="stage-divider" aria-hidden="true"></div>
 
-    <!-- Answer Area (Pure Text) -->
-    <section class="answer-container">
+    <!-- Answer Area (Real-time Speech Capture & Manual Edit) -->
+    <section class="answer-container" aria-label="Candidate response">
       <div class="section-indicator">
         <span class="section-label">YOUR ANSWER</span>
 
         <!-- Listening Mic Status -->
         <div class="mic-status" *ngIf="isListening && !isProcessingFeedback">
           <span class="mic-pulse"></span>
-          <span class="mic-text">Listening... Speak clearly</span>
+          <span class="mic-text">Recording... Speak your answer</span>
         </div>
 
         <!-- Feedback Processing Spinner -->
         <div class="processing-badge" *ngIf="isProcessingFeedback">
           <span class="spinner"></span>
-          <span>Evaluating response & saving...</span>
+          <span>AI evaluating response...</span>
         </div>
       </div>
 
-      <p class="answer-text" [class.recording-text]="isListening">
-        {{ userAnswer || (isListening ? 'Listening to your microphone...' : 'Waiting for interviewer...') }}
-      </p>
+      <!-- Answer Box (Displays live speech transcript with optional editing) -->
+      <div class="answer-box-wrapper" [class.is-recording]="isListening">
+        <textarea
+          class="answer-textarea"
+          [(ngModel)]="userAnswer"
+          [disabled]="isProcessingFeedback || isAiSpeaking"
+          placeholder="Speak into your microphone... Your answer will appear here in real time. (You can also type or edit before submitting)">
+        </textarea>
+      </div>
+
+      <div class="answer-tip" *ngIf="isListening && !isProcessingFeedback">
+        💡 <em>Pause for 3 seconds or tap <strong>Submit Answer</strong> below when you are finished speaking.</em>
+      </div>
     </section>
 
-    <!-- Controls -->
+    <!-- Controls Bar -->
     <div class="stage-controls">
+      <!-- Direct Submit Button: Instantly submits without waiting for silence timer -->
+      <button
+        class="control-btn submit-btn"
+        *ngIf="userAnswer.trim().length > 0 && !isProcessingFeedback && !isAiSpeaking"
+        (click)="finishAndSubmitAnswer()"
+        title="Submit your answer now">
+        🚀 Submit Answer
+      </button>
+
+      <!-- Clear & Redo Voice -->
+      <button
+        class="control-btn clear-btn"
+        *ngIf="userAnswer.trim().length > 0 && !isProcessingFeedback && !isAiSpeaking"
+        (click)="clearCurrentAnswer()"
+        title="Clear transcript and speak again">
+        🔄 Clear & Retry
+      </button>
+
+      <!-- Pause / Resume -->
       <button
         class="control-btn stop-btn"
-        *ngIf="!isPaused"
-        (click)="stopInterview()">
-        Pause Interview
+        *ngIf="!isPaused && !isProcessingFeedback"
+        (click)="stopInterview()"
+        title="Pause interview session">
+        ⏸ Pause
       </button>
 
       <button
         class="control-btn resume-btn"
         *ngIf="isPaused"
-        (click)="resumeInterview()">
-        Resume Interview
+        (click)="resumeInterview()"
+        title="Resume interview session">
+        ▶ Resume
       </button>
     </div>
 
   </main>
 
-  <!-- Start Session Modal (Minimalist & Transparent) -->
+  <!-- Interview Completed Card -->
+  <div class="completed-stage" *ngIf="isInterviewComplete">
+    <div class="completed-card">
+      <div class="trophy-icon">🏆</div>
+      <h2 class="completed-title">Interview Completed!</h2>
+      <p class="completed-subtitle">
+        Great work! All your answers, evaluations, and AI feedback for <strong>{{ role }}</strong> have been recorded to your history.
+      </p>
+
+      <div class="completed-actions">
+        <button class="btn btn-primary" (click)="goToHistory()">
+          📊 View Progress & History
+        </button>
+        <button class="btn btn-outline" (click)="goToDashboard()">
+          🏠 Back to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Session Modal (Centered & Transparent) -->
   <div class="modal-overlay" *ngIf="showStartModal">
     <div class="modal-card">
       <h2 class="modal-title">Ready to Begin?</h2>
       <p class="modal-desc">
-        Your AI interview for <strong>{{ role }}</strong> ({{ difficulty }}) is initialized.
+        Your AI interview for <strong>{{ role }}</strong> ({{ difficulty | titlecase }}) is ready. Please ensure your microphone is enabled.
       </p>
 
       <div class="modal-voice-row">
-        <label>Interviewer Voice:</label>
-        <select
-          class="voice-select-modal"
-          [ngModel]="selectedVoicePersona"
-          (ngModelChange)="onVoiceChange($event)">
-          <option value="natural-female">Natural Female (Ava / Samantha)</option>
-          <option value="natural-male">Natural Male (Daniel / Alex)</option>
-          <option value="system">System Default</option>
-        </select>
-        <button type="button" class="test-voice-modal-btn" (click)="testVoice()">
-          🔊 Test
-        </button>
+        <label for="modalVoiceSelect">Interviewer Voice:</label>
+        <div class="modal-voice-picker">
+          <select
+            id="modalVoiceSelect"
+            class="voice-select-modal"
+            [ngModel]="selectedVoicePersona"
+            (ngModelChange)="onVoiceChange($event)">
+            <option value="natural-female">Natural Female (Ava / Samantha)</option>
+            <option value="natural-male">Natural Male (Daniel / Alex)</option>
+            <option value="system">System Default</option>
+          </select>
+          <button type="button" class="test-voice-modal-btn" (click)="testVoice()">
+            🔊 Test
+          </button>
+        </div>
       </div>
 
       <button class="start-session-btn" (click)="startInterviewFromPopup()">

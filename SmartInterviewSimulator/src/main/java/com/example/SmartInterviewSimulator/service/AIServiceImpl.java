@@ -144,28 +144,60 @@ public class AIServiceImpl implements AIService {
     @Override
     public String evaluateAnswer(String question, String answer) {
 
-        String prompt = "You are a professional technical interviewer.\n\n" +
+        String prompt = "You are an expert technical interviewer assessing a job candidate.\n\n" +
                 "Question: " + question + "\n" +
                 "Candidate Answer: " + answer + "\n\n" +
-                "Evaluate this answer objectively.\n" +
-                "Respond in EXACTLY this format:\n" +
+                "SCORING CRITERIA (1 to 10):\n" +
+                "- 1-3: Blank, irrelevant, 'I don't know', 'skip', or completely incorrect.\n" +
+                "- 4-5: Vague, superficial, or contains notable technical mistakes.\n" +
+                "- 6-7: Good answer covering core fundamentals with reasonable clarity.\n" +
+                "- 8-9: Strong answer with deep technical explanation, clear structure, and practical insights.\n" +
+                "- 10: Exceptional, comprehensive response demonstrating industry mastery.\n\n" +
+                "INSTRUCTIONS:\n" +
+                "1. Provide a realistic score from 1 to 10 based strictly on technical accuracy, clarity, and depth.\n" +
+                "2. Provide 2-3 sentences of constructive, natural feedback highlighting what was done well and what key concepts or real-world details could improve the answer.\n" +
+                "3. Use plain text only (do NOT use markdown bold, asterisks, or bullet points).\n\n" +
+                "OUTPUT FORMAT (EXACTLY TWO LINES):\n" +
                 "Score: <number between 1 and 10>/10\n" +
-                "Feedback: <2-3 sentences of clear, constructive feedback on strengths and improvement areas>";
+                "Feedback: <Your 2-3 sentence feedback>";
 
-        return callAI(prompt);
+        String result = callAI(prompt);
+        if (result == null || result.trim().isEmpty() || !result.toLowerCase().contains("score:")) {
+            result = getSmartFallbackEvaluation(answer);
+        }
+        return result;
     }
 
     // 🔥 Follow-up
     @Override
     public String generateFollowUp(String question, String answer) {
 
-        String prompt = "You are an interviewer.\n" +
-                "Ask ONE concise follow-up question based on the candidate's answer.\n" +
-                "Do not include preamble or numbering, just the question ending with '?'.\n\n" +
-                "Question: " + question + "\n" +
-                "Answer: " + answer;
+        String prompt = "You are an intelligent, conversational technical interviewer.\n" +
+                "Based on the original question and the candidate's answer below, ask ONE relevant, concise follow-up question.\n" +
+                "- If the candidate answered well, probe a deeper edge case, performance consideration, or practical trade-off.\n" +
+                "- If the candidate's answer was incomplete or vague, ask for clarification or a simple practical example.\n" +
+                "- If the candidate said they don't know or skipped, ask a related foundational concept.\n" +
+                "- Output ONLY the single question ending with '?'. No greetings, no preamble, no markdown.\n\n" +
+                "Original Question: " + question + "\n" +
+                "Candidate Answer: " + answer;
 
-        return callAI(prompt);
+        String res = callAI(prompt);
+        if (res == null || res.trim().isEmpty() || !res.contains("?")) {
+            return "Can you share a specific real-world example or trade-off you encountered with this?";
+        }
+        return res.replaceAll("[*#_`~]", "").trim();
+    }
+
+    // 🔥 Context-aware fallback evaluation when external AI APIs are unreachable
+    private String getSmartFallbackEvaluation(String answer) {
+        String lowerAns = answer != null ? answer.trim().toLowerCase() : "";
+        if (lowerAns.isEmpty() || lowerAns.length() < 12 || lowerAns.contains("don't know") || lowerAns.contains("dont know") || lowerAns.contains("skip") || lowerAns.contains("not sure")) {
+            return "Score: 2/10\nFeedback: No substantive technical answer was provided for this question. Make sure to review the core concepts and try explaining the fundamentals.";
+        }
+        if (lowerAns.length() < 45) {
+            return "Score: 5/10\nFeedback: You touched on the basic concept, but the answer lacks technical depth and specific implementation details.";
+        }
+        return "Score: 7/10\nFeedback: Good explanation of the core concepts. Discussing real-world edge cases and trade-offs would make your answer even stronger.";
     }
 
     // 🔥 PRIMARY AI CALL WITH GROQ AND GEMINI FALLBACK
@@ -188,7 +220,7 @@ public class AIServiceImpl implements AIService {
             System.err.println("Gemini fallback also failed: " + e.getMessage());
         }
 
-        return "Score: 6/10\nFeedback: Your answer covers the basics well. Providing specific practical examples would make it stronger.";
+        return "Score: 7/10\nFeedback: Your answer covers the basics well. Providing specific practical examples would make it stronger.";
     }
 
     // 🔥 GROQ CALL

@@ -7,12 +7,12 @@ public class AnswerRequest {
     ===================================== */
     private Long interviewId;
     private Long questionId;
-
     private String answerText;
 
     /* =====================================
        EXTRA FIELDS
     ===================================== */
+    private String questionText;
     private String role;
     private String difficulty;
 
@@ -44,42 +44,39 @@ public class AnswerRequest {
         return interviewId;
     }
 
-    public void setInterviewId(
-        Long interviewId
-    ) {
-        this.interviewId =
-            interviewId;
+    public void setInterviewId(Long interviewId) {
+        this.interviewId = interviewId;
     }
 
     public Long getQuestionId() {
         return questionId;
     }
 
-    public void setQuestionId(
-        Long questionId
-    ) {
-        this.questionId =
-            questionId;
+    public void setQuestionId(Long questionId) {
+        this.questionId = questionId;
     }
 
     public String getAnswerText() {
         return answerText;
     }
 
-    public void setAnswerText(
-        String answerText
-    ) {
-        this.answerText =
-            answerText;
+    public void setAnswerText(String answerText) {
+        this.answerText = answerText;
+    }
+
+    public String getQuestionText() {
+        return questionText;
+    }
+
+    public void setQuestionText(String questionText) {
+        this.questionText = questionText;
     }
 
     public String getRole() {
         return role;
     }
 
-    public void setRole(
-        String role
-    ) {
+    public void setRole(String role) {
         this.role = role;
     }
 
@@ -87,11 +84,8 @@ public class AnswerRequest {
         return difficulty;
     }
 
-    public void setDifficulty(
-        String difficulty
-    ) {
-        this.difficulty =
-            difficulty;
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
     }
 
 }

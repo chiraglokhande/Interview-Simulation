@@ -55,10 +55,15 @@ public class AnswerServiceImpl implements AnswerService {
         int score = 7;
         String feedback = "Good effort. Your answer addresses key concepts.";
 
+        String evalQuestion = request.getQuestionText();
+        if (evalQuestion == null || evalQuestion.trim().isEmpty()) {
+            evalQuestion = question.getQuestionText();
+        }
+
         try {
-            // 🔥 Call AI
+            // 🔥 Call AI with the exact question asked
             aiResponse = aiService.evaluateAnswer(
-                    question.getQuestionText(),
+                    evalQuestion,
                     request.getAnswerText()
             );
 

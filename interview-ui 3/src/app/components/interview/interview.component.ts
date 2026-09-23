@@ -1,11 +1,9 @@
 import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { InterviewService } from '../../services/interview.service';
 import { Location } from '@angular/common';
-
-declare var webkitSpeechRecognition: any;
 
 @Component({
   selector: 'app-interview',
@@ -27,14 +25,20 @@ export class InterviewComponent implements OnInit, OnDestroy {
   displayedText = '';
 
   userAnswer = '';
+  isManualEditing = false;
 
   isPaused = false;
   isListening = false;
+  shouldBeListening = false;
   isStopped = false;
   isProcessingFeedback = false;
   isFollowUp = false;
   isAiSpeaking = false;
   saveStatus = '';
+  isInterviewComplete = false;
+
+  latestScore: number | null = null;
+  latestFeedback: string = '';
 
   showStartModal = true;
   userName = 'Candidate';
@@ -51,6 +55,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
   constructor(
     private zone: NgZone,
     private route: ActivatedRoute,
+    private router: Router,
     private cdr: ChangeDetectorRef,
     private interviewService: InterviewService,
     private location: Location
@@ -83,13 +88,23 @@ export class InterviewComponent implements OnInit, OnDestroy {
     this.cleanupSpeech();
   }
 
-  goBack() {
+  goBack(): void {
     this.cleanupSpeech();
     this.location.back();
   }
 
+  goToDashboard(): void {
+    this.cleanupSpeech();
+    this.router.navigate(['/dashboard']);
+  }
+
+  goToHistory(): void {
+    this.cleanupSpeech();
+    this.router.navigate(['/history']);
+  }
+
   // ================= VOICE SETUP =================
-  initVoices() {
+  initVoices(): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       this.loadVoicesList();
       window.speechSynthesis.onvoiceschanged = () => {
@@ -100,7 +115,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadVoicesList() {
+  loadVoicesList(): void {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     this.availableVoices = window.speechSynthesis.getVoices();
   }
@@ -149,15 +164,14 @@ export class InterviewComponent implements OnInit, OnDestroy {
     return pool.find(v => v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Enhanced')) || pool[0] || null;
   }
 
-  onVoiceChange(persona: string) {
+  onVoiceChange(persona: string): void {
     this.selectedVoicePersona = persona;
   }
 
-  testVoice() {
-    this.speakWithTyping("Hello! I am your AI interviewer. I'm excited to speak with you today.");
+  testVoice(): void {
+    this.speakWithTyping("Hello! I am your AI interviewer. I'm ready to conduct your interview session today.");
   }
 
-  // Clean raw markdown, prompts, scores, asterisks for natural voice
   cleanTextForSpeech(raw: string): string {
     if (!raw) return '';
     return raw
@@ -170,7 +184,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
   }
 
   // ================= LOAD / START QUESTIONS =================
-  loadInterviewQuestions() {
+  loadInterviewQuestions(): void {
     if (this.interviewId > 0) {
       this.interviewService.getQuestionsByInterview(this.interviewId).subscribe({
         next: (res: any[]) => {
@@ -189,7 +203,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  startFreshInterview() {
+  startFreshInterview(): void {
     this.interviewService.startInterview(this.role, this.difficulty).subscribe({
       next: (res: any) => {
         if (res?.id) {
@@ -212,20 +226,20 @@ export class InterviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  fallbackQuestions() {
+  fallbackQuestions(): void {
     this.interviewService.getQuestions(this.role, this.difficulty).subscribe({
       next: (res: any[]) => {
         this.setupQuestions(res || []);
       },
       error: () => {
         this.setupQuestions([
-          { id: 1, question: `Can you introduce yourself and describe your experience with ${this.role}?` }
+          { id: 1, question: `Can you introduce yourself and describe your technical experience as a ${this.role}?` }
         ]);
       }
     });
   }
 
-  setupQuestions(list: any[]) {
+  setupQuestions(list: any[]): void {
     this.questions = list;
     this.currentQuestionIndex = 0;
     if (this.questions.length > 0) {
@@ -233,7 +247,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  setCurrentQuestion() {
+  setCurrentQuestion(): void {
     this.currentQuestionObject = this.questions[this.currentQuestionIndex] || {};
     this.currentQuestionText =
       this.currentQuestionObject.question ||
@@ -241,8 +255,13 @@ export class InterviewComponent implements OnInit, OnDestroy {
       '';
   }
 
+  get progressPercentage(): number {
+    if (!this.questions || this.questions.length === 0) return 0;
+    return Math.round(((this.currentQuestionIndex + 1) / this.questions.length) * 100);
+  }
+
   // ================= START FROM POPUP =================
-  startInterviewFromPopup() {
+  startInterviewFromPopup(): void {
     this.showStartModal = false;
     this.isStopped = false;
 
@@ -255,21 +274,22 @@ export class InterviewComponent implements OnInit, OnDestroy {
   }
 
   // ================= ASK QUESTION =================
-  runQuestion() {
+  runQuestion(): void {
     if (this.isStopped) return;
 
     this.userAnswer = '';
+    this.isFollowUp = false;
     this.setCurrentQuestion();
 
     this.speakWithTyping(this.currentQuestionText, () => {
       setTimeout(() => {
         this.startListening();
-      }, 400);
+      }, 450);
     });
   }
 
   // ================= SPEAK + TYPEWRITER =================
-  speakWithTyping(text: string, onComplete?: () => void) {
+  speakWithTyping(text: string, onComplete?: () => void): void {
     this.stopListening();
 
     if (this.typingInterval) {
@@ -277,6 +297,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
     }
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
     }
 
     this.displayedText = '';
@@ -303,8 +324,8 @@ export class InterviewComponent implements OnInit, OnDestroy {
     speech.onstart = () => {
       this.zone.run(() => {
         this.isAiSpeaking = true;
-        const totalDurationMs = Math.max(1000, cleanSpeechText.length * 55);
-        const intervalMs = Math.max(25, Math.floor(totalDurationMs / (displayText.length || 1)));
+        const totalDurationMs = Math.max(1200, cleanSpeechText.length * 52);
+        const intervalMs = Math.max(22, Math.floor(totalDurationMs / (displayText.length || 1)));
 
         this.typingInterval = setInterval(() => {
           if (this.isStopped) {
@@ -356,12 +377,15 @@ export class InterviewComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ================= SPEECH RECOGNITION =================
-  initSpeechRecognition() {
+  // ================= SPEECH RECOGNITION (PROPER VOICE CAPTURE) =================
+  initSpeechRecognition(): void {
     if (typeof window === 'undefined') return;
 
     const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+      console.warn('SpeechRecognition API not available in this browser environment.');
+      return;
+    }
 
     this.recognition = new SpeechRecognition();
     this.recognition.continuous = true;
@@ -377,7 +401,17 @@ export class InterviewComponent implements OnInit, OnDestroy {
 
     this.recognition.onend = () => {
       this.zone.run(() => {
-        this.isListening = false;
+        // Continuous auto-restart: Keep listening if candidate is still answering
+        if (this.shouldBeListening && !this.isProcessingFeedback && !this.isAiSpeaking && !this.isStopped) {
+          try {
+            this.recognition.start();
+            this.isListening = true;
+          } catch {
+            this.isListening = false;
+          }
+        } else {
+          this.isListening = false;
+        }
         this.cdr.detectChanges();
       });
     };
@@ -385,60 +419,106 @@ export class InterviewComponent implements OnInit, OnDestroy {
     this.recognition.onresult = (event: any) => {
       if (this.isProcessingFeedback || this.isAiSpeaking) return;
 
-      let transcript = '';
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+      // ACCUMULATE COMPLETE TRANSCRIPT ACROSS ALL PHRASES (Fixes sentence wipe-out bug)
+      let finalTranscript = '';
+      let interimTranscript = '';
+
+      for (let i = 0; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript + ' ';
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
       }
 
+      const fullTranscript = (finalTranscript + interimTranscript).trim();
+
       this.zone.run(() => {
-        this.userAnswer = transcript;
+        if (fullTranscript.length > 0) {
+          this.userAnswer = fullTranscript;
+        }
         this.cdr.detectChanges();
       });
 
+      // Natural pause detection: Auto-submits after 3.2 seconds of silence once candidate has spoken
       clearTimeout(this.silenceTimer);
-      this.silenceTimer = setTimeout(() => {
-        this.handleAnswer();
-      }, 2200);
+      if (this.userAnswer.trim().length > 3) {
+        this.silenceTimer = setTimeout(() => {
+          this.zone.run(() => {
+            this.handleAnswer();
+          });
+        }, 3200);
+      }
     };
 
-    this.recognition.onerror = () => {
+    this.recognition.onerror = (event: any) => {
       this.zone.run(() => {
-        this.isListening = false;
+        // Ignore harmless 'no-speech' timeout and continue listening
+        if (event.error !== 'no-speech') {
+          console.warn('Speech recognition warning:', event.error);
+        }
         this.cdr.detectChanges();
       });
     };
   }
 
-  startListening() {
-    if (this.isStopped || this.isAiSpeaking) return;
+  startListening(): void {
+    if (this.isStopped || this.isAiSpeaking || this.isProcessingFeedback) return;
+    this.shouldBeListening = true;
     try {
       this.recognition?.start();
     } catch {}
+    this.isListening = true;
+    this.cdr.detectChanges();
   }
 
-  stopListening() {
+  stopListening(): void {
+    this.shouldBeListening = false;
+    clearTimeout(this.silenceTimer);
     try {
       this.recognition?.stop();
     } catch {}
+    this.isListening = false;
+    this.cdr.detectChanges();
+  }
+
+  /**
+   * Allows the candidate to immediately submit their answer without waiting for the silence timer
+   */
+  finishAndSubmitAnswer(): void {
+    if (!this.userAnswer.trim() || this.isProcessingFeedback) return;
+    clearTimeout(this.silenceTimer);
+    this.handleAnswer();
+  }
+
+  /**
+   * Resets spoken answer and re-opens mic
+   */
+  clearCurrentAnswer(): void {
+    clearTimeout(this.silenceTimer);
+    this.userAnswer = '';
+    this.startListening();
   }
 
   // ================= SUBMIT AND HANDLE ANSWER =================
-  handleAnswer() {
+  handleAnswer(): void {
     if (!this.userAnswer.trim() || this.isStopped || this.isProcessingFeedback) {
       return;
     }
 
     this.isProcessingFeedback = true;
     this.stopListening();
-    this.setTemporaryStatus('Evaluating answer & saving feedback to database...');
+    this.setTemporaryStatus('Evaluating answer & saving feedback...');
 
     const currentQ = this.currentQuestionObject || this.questions[this.currentQuestionIndex] || {};
-    const answeredText = this.userAnswer;
+    const answeredText = this.userAnswer.trim();
     const wasFollowUp = this.isFollowUp;
+    const evaluatedQuestionText = this.currentQuestionText; // Accurate question being answered
 
     const payload = {
       interviewId: this.interviewId,
       questionId: currentQ.id || 1,
+      questionText: evaluatedQuestionText,
       answerText: answeredText,
       role: this.role,
       difficulty: this.difficulty
@@ -450,22 +530,26 @@ export class InterviewComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         const score = res?.score ?? 7;
         const feedback = res?.feedback?.trim() || 'Good response.';
-        this.setTemporaryStatus(`✓ Saved to DB • Score: ${score}/10`);
+        this.latestScore = score;
+        this.latestFeedback = feedback;
+
+        this.setTemporaryStatus(`✓ Saved • Score: ${score}/10`);
 
         const cleanFeedback = this.cleanTextForSpeech(feedback);
 
         if (!wasFollowUp) {
           // Speak feedback for initial response, then ask ONE intelligent follow-up
           this.speakWithTyping(cleanFeedback, () => {
-            this.interviewService.getFollowUp(this.currentQuestionText, answeredText).subscribe({
+            this.interviewService.getFollowUp(evaluatedQuestionText, answeredText).subscribe({
               next: (followQ: any) => {
                 const followClean = (typeof followQ === 'string' ? followQ : followQ?.question || '')
-                  .replace(/[*#]/g, '')
+                  .replace(/[*#_`~]/g, '')
                   .trim();
 
-                const finalQ = "Alright. " + (followClean || "Can you give a practical scenario where you applied this?");
+                const finalQ = "Alright. " + (followClean || "Can you give a practical scenario where you applied this in a project?");
                 this.userAnswer = '';
                 this.isFollowUp = true;
+                this.currentQuestionText = finalQ; // CRITICAL: Updates current question text for follow-up
 
                 this.speakWithTyping(finalQ, () => {
                   this.isProcessingFeedback = false;
@@ -505,18 +589,18 @@ export class InterviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  setTemporaryStatus(msg: string) {
+  setTemporaryStatus(msg: string): void {
     this.saveStatus = msg;
     clearTimeout(this.statusTimer);
     this.statusTimer = setTimeout(() => {
       this.saveStatus = '';
       this.cdr.detectChanges();
-    }, 4000);
+    }, 4500);
     this.cdr.detectChanges();
   }
 
   // ================= NEXT QUESTION =================
-  nextQuestion() {
+  nextQuestion(): void {
     if (this.isStopped) return;
 
     if (this.currentQuestionIndex < this.questions.length - 1) {
@@ -528,9 +612,10 @@ export class InterviewComponent implements OnInit, OnDestroy {
   }
 
   // ================= STOP / RESUME / FINISH =================
-  stopInterview() {
+  stopInterview(): void {
     this.isPaused = true;
     this.isStopped = true;
+    this.shouldBeListening = false;
     this.isListening = false;
     this.isProcessingFeedback = false;
     this.isAiSpeaking = false;
@@ -540,7 +625,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  resumeInterview() {
+  resumeInterview(): void {
     this.isPaused = false;
     this.isStopped = false;
     this.displayedText = '';
@@ -550,13 +635,14 @@ export class InterviewComponent implements OnInit, OnDestroy {
     }, 300);
   }
 
-  finishInterview() {
+  finishInterview(): void {
     this.cleanupSpeech();
+    this.isInterviewComplete = true;
     this.displayedText = '🎉 Interview Completed Successfully! Your answers and AI evaluations have been saved to your History.';
-    this.speakWithTyping('Congratulations! Your interview is complete, and your evaluation has been saved.');
+    this.speakWithTyping('Congratulations! Your interview is complete, and your evaluation has been saved to your history.');
   }
 
-  cleanupSpeech() {
+  cleanupSpeech(): void {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
