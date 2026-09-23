@@ -30,7 +30,7 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global Video Background - Full Cinematic Viewport Display Without Distortion */
+/* Global Video Background - Full Viewport Without Canvas Clipping */
 .video-background-container {
   position: fixed;
   top: 0;
@@ -38,7 +38,7 @@ html, body {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  z-index: -1;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
   background: transparent !important;
@@ -50,7 +50,8 @@ html, body {
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover !important; /* Cinematic edge-to-edge covering, perfectly proportioned on phones */
+  display: block;
+  object-fit: cover !important;
   object-position: center center;
   filter: none !important;
   border: none;
@@ -61,7 +62,6 @@ html, body {
   pointer-events: none;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  will-change: opacity;
 }
 
 .video-background.active {
@@ -122,11 +122,12 @@ html, body {
 
 .app-root-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   min-height: 100vh;
   min-height: 100dvh;
   width: 100%;
   background: transparent !important;
+  pointer-events: auto;
 }
 
 /* Global Typography Shadows (Crystal Clear Against Day & Night Scenery) */

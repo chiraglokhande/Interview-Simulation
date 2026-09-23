@@ -41,7 +41,7 @@ export class App implements AfterViewInit, OnDestroy {
 
   toggleTheme(): void {
     this.themeService.toggleTheme();
-    // Use microtask so DOM classes update first, then synchronize playback
+    // Allow DOM binding to update first, then synchronize playback
     setTimeout(() => {
       this.syncVideoPlayback();
     }, 50);
@@ -86,12 +86,30 @@ export class App implements AfterViewInit, OnDestroy {
     if (activeVideo) {
       activeVideo.muted = true;
       activeVideo.defaultMuted = true;
+      activeVideo.playsInline = true;
 
       const playPromise = activeVideo.play();
       if (playPromise !== undefined) {
         playPromise.catch((_err) => {
           // Autoplay blocked by mobile browser or low-power mode.
           // Arm universal user interaction listener to play on first touch.
+          this.armInteractionTrigger();
+        });
+      }
+    }
+  }
+
+  /**
+   * Starts active video immediately when media data becomes playable
+   */
+  onVideoCanPlay(event: Event): void {
+    const video = event.target as HTMLVideoElement;
+    if (video) {
+      video.muted = true;
+      video.defaultMuted = true;
+      const isNight = video.classList.contains('night-video');
+      if (isNight === this.isDarkMode && video.paused) {
+        video.play().catch(() => {
           this.armInteractionTrigger();
         });
       }

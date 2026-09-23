@@ -13,8 +13,10 @@
     class="video-background day-video"
     [class.active]="!isDarkMode"
     preload="auto"
+    (canplay)="onVideoCanPlay($event)"
     (ended)="onVideoEnded($event)">
     <source src="/background.mp4" type="video/mp4">
+    <source src="assets/background.mp4" type="video/mp4">
   </video>
 
   <!-- Night Mode Video (Dark Mode) -->
@@ -27,11 +29,13 @@
     loop
     playsinline
     webkit-playsinline="true"
-    class="video-background night-video"
+    class="video-background night-video active"
     [class.active]="isDarkMode"
     preload="auto"
+    (canplay)="onVideoCanPlay($event)"
     (ended)="onVideoEnded($event)">
     <source src="/background-night.mp4" type="video/mp4">
+    <source src="assets/background-night.mp4" type="video/mp4">
   </video>
 </div>
 
