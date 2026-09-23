@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InterviewService } from '../../services/interview.service';
-import { Location } from '@angular/common';
+import { formatTextForSpeech } from '../../utils/speech-pronunciation.util';
 
 @Component({
   selector: 'app-interview',
@@ -173,14 +173,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
   }
 
   cleanTextForSpeech(raw: string): string {
-    if (!raw) return '';
-    return raw
-      .replace(/^Score:\s*\d+\s*(?:\/\s*10)?/gim, '')
-      .replace(/^Feedback:\s*/gim, '')
-      .replace(/Next Question:[\s\S]*$/gi, '')
-      .replace(/[*#_`~]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return formatTextForSpeech(raw);
   }
 
   // ================= LOAD / START QUESTIONS =================
@@ -325,7 +318,7 @@ export class InterviewComponent implements OnInit, OnDestroy {
       this.zone.run(() => {
         this.isAiSpeaking = true;
         const totalDurationMs = Math.max(1200, cleanSpeechText.length * 52);
-        const intervalMs = Math.max(22, Math.floor(totalDurationMs / (displayText.length || 1)));
+        const step = Math.max(1, Math.ceil(displayText.length / (totalDurationMs / 32)));
 
         this.typingInterval = setInterval(() => {
           if (this.isStopped) {
@@ -333,13 +326,13 @@ export class InterviewComponent implements OnInit, OnDestroy {
             return;
           }
           if (index < displayText.length) {
-            this.displayedText += displayText.charAt(index);
-            index++;
+            index = Math.min(displayText.length, index + step);
+            this.displayedText = displayText.slice(0, index);
             this.cdr.detectChanges();
           } else {
             clearInterval(this.typingInterval);
           }
-        }, intervalMs);
+        }, 32);
       });
     };
 

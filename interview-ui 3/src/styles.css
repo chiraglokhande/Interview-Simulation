@@ -135,6 +135,7 @@ h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 4px 18px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.7);
   letter-spacing: 0.5px;
   overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 p, span, label, button, a, select, input, textarea {
