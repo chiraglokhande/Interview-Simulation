@@ -1,26 +1,36 @@
 <!-- Dual Dynamic Video Backgrounds (Day & Night) -->
-<div class="video-background-container">
+<div class="video-background-container" aria-hidden="true">
   <!-- Day Mode Video -->
   <video
+    #dayVideo
+    src="/background.mp4"
     autoplay
+    [muted]="true"
     muted
     loop
     playsinline
+    webkit-playsinline="true"
     class="video-background day-video"
     [class.active]="!isDarkMode"
-    preload="auto">
+    preload="auto"
+    (ended)="onVideoEnded($event)">
     <source src="/background.mp4" type="video/mp4">
   </video>
 
   <!-- Night Mode Video (Dark Mode) -->
   <video
+    #nightVideo
+    src="/background-night.mp4"
     autoplay
+    [muted]="true"
     muted
     loop
     playsinline
+    webkit-playsinline="true"
     class="video-background night-video"
     [class.active]="isDarkMode"
-    preload="auto">
+    preload="auto"
+    (ended)="onVideoEnded($event)">
     <source src="/background-night.mp4" type="video/mp4">
   </video>
 </div>

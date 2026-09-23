@@ -5,37 +5,56 @@
   box-sizing: border-box;
 }
 
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 html, body {
   width: 100%;
   min-height: 100%;
   margin: 0;
   padding: 0;
-  background: transparent !important;
+  background: #0a0e17;
   color: #ffffff;
   font-family: 'Quicksand', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global Video Background - 100% Full Video Display Without Cropping */
+/* Global Video Background - Full Cinematic Viewport Display Without Distortion */
 .video-background-container {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   z-index: -999;
   overflow: hidden;
   pointer-events: none;
-  background: transparent !important;
+  background: #0a0e17;
 }
 
 .video-background {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  min-height: 100%;
   width: 100%;
   height: 100%;
-  object-fit: fill !important; /* Full frame from edge to edge without any cropping */
+  object-fit: cover !important; /* Cinematic edge-to-edge covering, perfectly proportioned on phones */
+  object-position: center center;
   filter: none !important;
   border: none;
   outline: none;
@@ -43,6 +62,9 @@ html, body {
   visibility: hidden;
   transition: opacity 0.85s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.85s;
   pointer-events: none;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: opacity;
 }
 
 .video-background.active {
@@ -54,8 +76,8 @@ html, body {
 /* Floating Minimalist Theme Toggle Button (Day / Night) */
 .global-theme-wrapper {
   position: fixed;
-  top: 24px;
-  left: 28px;
+  top: calc(22px + var(--sat));
+  left: calc(26px + var(--sal));
   z-index: 9999;
   pointer-events: auto;
 }
@@ -66,7 +88,7 @@ html, body {
   gap: 8px;
   padding: 8px 18px;
   border-radius: 40px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   border: 1.5px solid rgba(255, 255, 255, 0.45);
   color: #ffffff;
   font-size: 13px;
@@ -75,7 +97,10 @@ html, body {
   cursor: pointer;
   outline: none;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  touch-action: manipulation;
 }
 
 .theme-toggle-btn:hover {
@@ -83,6 +108,10 @@ html, body {
   background: rgba(0, 0, 0, 0.65);
   border-color: rgba(255, 255, 255, 0.8);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.97);
 }
 
 .theme-icon {
@@ -98,23 +127,26 @@ html, body {
   position: relative;
   z-index: 1;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   background: transparent !important;
 }
 
-/* Global Elite Typography Shadows (Crystal Clear Against Day & Night Scenery) */
+/* Global Typography Shadows (Crystal Clear Against Day & Night Scenery) */
 h1, h2, h3, h4, h5, h6 {
   text-shadow: 0 4px 18px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.7);
   letter-spacing: 0.5px;
+  overflow-wrap: break-word;
 }
 
 p, span, label, button, a, select, input, textarea {
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 1px 4px rgba(0, 0, 0, 0.7);
+  overflow-wrap: break-word;
 }
 
 /* Universal Minimal Scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -129,11 +161,15 @@ p, span, label, button, a, select, input, textarea {
 
 @media (max-width: 768px) {
   .global-theme-wrapper {
-    top: 14px;
-    left: 14px;
+    top: calc(12px + var(--sat));
+    left: calc(12px + var(--sal));
   }
   .theme-toggle-btn {
     padding: 6px 14px;
     font-size: 12px;
+    gap: 6px;
+  }
+  .theme-icon {
+    font-size: 14px;
   }
 }

@@ -9,14 +9,16 @@
   display: block;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   background: transparent !important;
 }
 
 .history-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 28px 48px;
+  padding: calc(18px + var(--sat)) calc(20px + var(--sar)) calc(32px + var(--sab)) calc(20px + var(--sal));
   background: transparent !important;
 }
 
@@ -26,25 +28,31 @@
   justify-content: flex-end;
   align-items: center;
   z-index: 10;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .back-btn {
-  padding: 10px 24px;
+  padding: 9px 22px;
+  min-height: 42px;
   border-radius: 40px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.4);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.25s ease, background 0.25s ease;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  touch-action: manipulation;
 }
 
 .back-btn:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.25);
+}
+
+.back-btn:active {
+  transform: scale(0.97);
 }
 
 /* HISTORY SECTION */
@@ -60,32 +68,36 @@
 
 .header-section {
   text-align: center;
-  margin-bottom: 36px;
+  margin-bottom: 28px;
 }
 
 .title {
   font-family: 'Cinzel', serif;
-  font-size: 52px;
+  font-size: clamp(28px, 7vw, 52px);
   font-weight: 700;
   color: #ffffff;
-  letter-spacing: 1.5px;
+  letter-spacing: 1.2px;
+  line-height: 1.2;
   text-shadow: 0 4px 18px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.7);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  overflow-wrap: break-word;
 }
 
 .subtitle {
   color: #f1f5f9;
-  font-size: 18px;
+  font-size: clamp(14px, 3.8vw, 18px);
   font-weight: 500;
+  line-height: 1.5;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+  max-width: 580px;
 }
 
 .status-msg {
   text-align: center;
   color: #fef08a;
-  font-size: 18px;
+  font-size: clamp(15px, 4vw, 18px);
   font-weight: 600;
-  margin: 30px auto;
+  margin: 24px auto;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85);
 }
 
@@ -94,16 +106,16 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  gap: 22px;
   padding-bottom: 40px;
 }
 
 /* HISTORY TILE (NO BLUR BOX - CLEAN TRANSPARENT OUTLINE) */
 .history-tile {
-  padding: 32px 24px;
+  padding: 28px 22px;
   border-radius: 22px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -114,51 +126,62 @@
 }
 
 .history-tile:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
   border-color: rgba(255, 255, 255, 0.6);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
 }
 
 .role-title {
   font-family: 'Cinzel', serif;
-  font-size: 26px;
+  font-size: clamp(20px, 5vw, 26px);
   font-weight: 700;
   color: #ffffff;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+  overflow-wrap: break-word;
 }
 
 .role-desc {
   color: #cbd5e1;
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 24px;
+  font-size: clamp(13px, 3.5vw, 14px);
+  line-height: 1.55;
+  margin-bottom: 22px;
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
 }
 
 .view-btn {
   padding: 12px 32px;
+  min-height: 48px;
   border-radius: 40px;
   border: 1.5px solid rgba(147, 197, 253, 0.6);
-  background: rgba(37, 99, 235, 0.75);
+  background: rgba(37, 99, 235, 0.8);
   color: #ffffff;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
   transition: transform 0.25s ease, background 0.25s ease;
+  touch-action: manipulation;
 }
 
 .view-btn:hover {
   transform: translateY(-2px);
-  background: rgba(37, 99, 235, 0.95);
+  background: rgba(37, 99, 235, 0.98);
 }
 
-@media (max-width: 768px) {
+.view-btn:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 640px) {
   .history-page {
-    padding: 20px;
+    padding: calc(14px + var(--sat)) 16px calc(24px + var(--sab));
   }
-  .title {
-    font-size: 34px;
+  .history-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .history-tile {
+    padding: 24px 18px;
   }
 }
