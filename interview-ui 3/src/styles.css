@@ -22,7 +22,7 @@ html, body {
   min-height: 100%;
   margin: 0;
   padding: 0;
-  background: #0a0e17;
+  background: transparent !important;
   color: #ffffff;
   font-family: 'Quicksand', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
@@ -38,19 +38,16 @@ html, body {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  z-index: -999;
+  z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  background: #0a0e17;
+  background: transparent !important;
 }
 
 .video-background {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  min-width: 100%;
-  min-height: 100%;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover !important; /* Cinematic edge-to-edge covering, perfectly proportioned on phones */
@@ -68,8 +65,8 @@ html, body {
 }
 
 .video-background.active {
-  opacity: 1;
-  visibility: visible;
+  opacity: 1 !important;
+  visibility: visible !important;
   z-index: 1;
 }
 
