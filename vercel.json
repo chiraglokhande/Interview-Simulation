@@ -1,0 +1,8 @@
+{
+  "installCommand": "cd \"interview-ui 3\" && npm install",
+  "buildCommand": "cd \"interview-ui 3\" && npm run build",
+  "outputDirectory": "interview-ui 3/dist/interview-ui",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

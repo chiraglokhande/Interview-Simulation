@@ -1,4 +1,5 @@
 {
+  "outputDirectory": "dist/interview-ui",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
